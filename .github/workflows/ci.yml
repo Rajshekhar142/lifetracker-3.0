@@ -51,7 +51,7 @@ jobs:
 
       # ── Unit + Integration tests ─────────────────────────────────────────
       - name: Run tests
-        run: npm run test:run
+        run: npm run test
 
       # ── Build ────────────────────────────────────────────────────────────
       - name: Build
