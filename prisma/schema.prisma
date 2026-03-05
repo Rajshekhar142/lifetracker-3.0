@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===============================
+// ENUMS
+// ===============================
+
+enum TaskStatus {
+  In_progress
+  Completed
+  Failed
+}
+
+// ===============================
+// AUTH MODELS
+// ===============================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+  domains       Domain[]
+  achievements  Achievement[]
+  tasks         Task[]    // Direct relation for faster querying
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@unique([providerId, accountId]) // Prevent duplicate provider accounts
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ===============================
+// PRODUCTIVITY MODELS
+// ===============================
+
+model Domain {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tasks     Task[]
+
+  @@index([userId])
+  @@map("domain")
+}
+
+model Task {
+  id              String     @id @default(cuid())
+  title           String
+  description     String?
+  difficulty      Int        @default(1)
+  status          TaskStatus @default(In_progress)
+
+  // Physics Metrics
+  durationMinutes Int?
+  resistanceLevel Int        @default(0)
+  calculatedWU    Float      @default(0)
+
+  createdAt       DateTime   @default(now())
+  startedAt       DateTime?   
+  // Relations
+  domainId        String
+  domain          Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  userId          String
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([userId])
+  @@index([status])
+  @@map("task")
+}
+
+
+model Achievement{
+  id String @id @default(cuid())
+  userId String 
+  user User @relation(fields:[userId], references: [id], onDelete: Cascade)
+  key String // "physical_elite", "iron_will" etc
+  isPublic Boolean @default(false)
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([userId])
+  @@map("achievement")
+}

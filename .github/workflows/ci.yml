@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Type Check, Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    env:
+      # Add all env vars your app needs to build
+      # Set these as secrets in GitHub → Settings → Secrets
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+      NEXT_PUBLIC_BETTER_AUTH_URL: ${{ secrets.NEXT_PUBLIC_BETTER_AUTH_URL }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Node setup ──────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # ── Install dependencies ─────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Generate Prisma client ───────────────────────────────────────────
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      # ── Type check ──────────────────────────────────────────────────────
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # ── Lint ────────────────────────────────────────────────────────────
+      - name: Lint
+        run: npm run lint
+
+      # ── Unit + Integration tests ─────────────────────────────────────────
+      - name: Run tests
+        run: npm run test:run
+
+      # ── Build ────────────────────────────────────────────────────────────
+      - name: Build
+        run: npm run build
