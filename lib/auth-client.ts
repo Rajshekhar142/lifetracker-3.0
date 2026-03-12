@@ -1,6 +1,8 @@
 import {createAuthClient} from "better-auth/react";
+import { emailOTPClient } from "better-auth/client/plugins";
 
-const authClient = createAuthClient();
+const authClient = createAuthClient({
+});
 export const signInWithGoogle = async()=>{
     await authClient.signIn.social({
         provider: "google",
@@ -13,3 +15,4 @@ export const signInWithGoogle = async()=>{
 export const {signOut , useSession} = authClient;
 export const signIn = authClient.signIn;
 export const signUp = authClient.signUp;
+export {authClient};

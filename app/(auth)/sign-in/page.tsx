@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { signInWithGoogle } from "@/lib/auth-client";
-import { checkUserHasDomains } from "../actions/domain-actions";
+import { checkUserHasDomains } from "../../actions/domain-actions";
 
 
 export default function SignInPage() {

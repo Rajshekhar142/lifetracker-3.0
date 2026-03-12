@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { signOut } from "better-auth/api";
+import type { Domain } from "@/generated/prisma/client";
+import { ShareCard } from "@/components/ShareCard";
 import {
   getUserAchievements,
   toggleAchievementVisibility,
   evaluateMasteryAchievements,
+  getWeeklyStats,
   type UserAchievement,
 } from "@/app/actions/achievement-store";
 import {
@@ -247,11 +250,22 @@ export default function AchievementsPage() {
   const [sidenavOpen, setSidenavOpen] = useState(false);
   const [activeTab, setActiveTab]     = useState<"mastery" | "hidden">("mastery");
   const [isPending, startTransition]  = useTransition();
+  type WeeklyStats = {
+  weekStart: Date;
+  weekEnd: Date;
+  totalWU: number;
+  domains: { name: string; wu: number }[];
+};
+const [weekStats, setWeekStats] = useState<WeeklyStats | null>(null);
 
   const refresh = async () => {
     const data = await getUserAchievements();
     setUnlocked(data.unlocked);
   };
+
+useEffect(() => {
+  getWeeklyStats().then(setWeekStats);
+}, []);
 
   useEffect(() => {
     setMounted(true);
@@ -550,7 +564,17 @@ export default function AchievementsPage() {
             </span>
           </div>
 
-          {/* Progress strip */}
+  {weekStats && (
+    <ShareCard
+      weekStart={weekStats.weekStart}
+      weekEnd={weekStats.weekEnd}
+      totalWU={weekStats.totalWU}
+      domains={weekStats.domains.map(d => ({ name: d.name, wu: 0 }))}
+      userName="your name" // or pull from session
+    />
+  )}
+
+  {/* Progress strip */}
           <div className="progress-strip">
             <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", flexShrink: 0 }}>
               PROGRESS

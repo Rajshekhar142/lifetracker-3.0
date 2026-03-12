@@ -8,6 +8,14 @@ generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
+generator erd {
+  provider                  = "prisma-erd-generator"
+  output                    = "./ERD.png"
+  theme                     = "dark"        // "default" renders clearest lines
+  includeRelationFromFields = true
+  erdDebug                  = true
+  disabled                  = false
+}
 
 datasource db {
   provider = "postgresql"
@@ -41,7 +49,13 @@ model User {
   domains       Domain[]
   achievements  Achievement[]
   tasks         Task[]    // Direct relation for faster querying
-
+  medicLogs     MedicLog[]
+  weeklyDigests WeeklyDigest[]
+  shadowThresholds ShadowThreshold[]
+  networksCreated  Network[]
+  networkMembers   NetworkMember[]
+  duelsInitiated   Duel[]          @relation("DuelInitiator")
+  duelsReceived    Duel[]          @relation("DuelChallenger")
   @@map("user")
 }
 
@@ -111,6 +125,7 @@ model Domain {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   tasks     Task[]
+  shadowThreshold ShadowThreshold?
 
   @@index([userId])
   @@map("domain")
@@ -120,9 +135,9 @@ model Task {
   id              String     @id @default(cuid())
   title           String
   description     String?
-  difficulty      Int        @default(1)
+  difficulty      Int        @default(1) // useless..
   status          TaskStatus @default(In_progress)
-
+  isMedicTask     Boolean @default(false)
   // Physics Metrics
   durationMinutes Int?
   resistanceLevel Int        @default(0)
@@ -155,4 +170,139 @@ model Achievement{
   @@unique([userId, key])
   @@index([userId])
   @@map("achievement")
+}
+
+model MedicLog {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  input          String
+  severity       Int
+  keywords       String[]
+  domainsActive  String[]
+  wuBeforeMedic  Float     @default(0)
+  wuAfterMedic   Float     @default(0)
+  recoveredAt    DateTime?
+  tasksCreated   Int       @default(0)
+  tasksCompleted Int       @default(0)
+  advice         String
+  createdAt      DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("medic_log")
+}
+
+model WeeklyDigest {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStart       DateTime
+  weekEnd         DateTime
+  medicSessions   Int       @default(0)
+  avgSeverity     Float     @default(0)
+  topTriggers     String[]
+  strongDomains   String[]
+  recoveryAvgDays Float     @default(0)
+  totalWU         Float     @default(0)
+  summary         String
+  emailSent       Boolean   @default(false)
+  sentAt          DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@unique([userId, weekStart])
+  @@index([userId])
+  @@map("weekly_digest")
+}
+model ShadowThreshold {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domainId    String    @unique
+  domain      Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  threshold   Float    // current WU target for the day
+  updatedAt   DateTime @default(now())
+  weekStart   DateTime // when this threshold period began
+
+  @@unique([userId, domainId])
+  @@index([userId])
+  @@map("shadow_threshold")
+}
+
+model Network {
+  id          String          @id @default(cuid())
+  name        String
+  domain      String
+  inviteCode  String          @unique @default(cuid())
+  createdById String
+  createdBy   User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  members     NetworkMember[]
+  duels       Duel[]
+  createdAt   DateTime        @default(now())
+
+  @@index([createdById])
+  @@index([inviteCode])
+  @@map("network")
+}
+
+model NetworkMember {
+  id        String   @id @default(cuid())
+  userId    String
+  networkId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  network   Network  @relation(fields: [networkId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now())
+
+  @@unique([userId, networkId])
+  @@index([networkId])
+  @@index([userId])
+  @@map("network_member")
+}
+
+model Duel {
+  id              String     @id @default(cuid())
+  networkId       String
+  network         Network    @relation(fields: [networkId], references: [id], onDelete: Cascade)
+
+  // Participants
+  initiatorId     String
+  initiator       User       @relation("DuelInitiator", fields: [initiatorId], references: [id])
+  challengerId    String
+  challenger      User       @relation("DuelChallenger", fields: [challengerId], references: [id])
+
+  // Domain being dueled on
+  domain          String
+
+  // Bets — each sets their own
+  initiatorBet    Float      // WU staked by initiator
+  challengerBet   Float      // WU staked by challenger
+
+  // WU earned during duel window
+  initiatorWU     Float      @default(0)
+  challengerWU    Float      @default(0)
+
+  // State
+  status          DuelStatus @default(Pending)
+  // Pending   — challenger hasn't accepted yet
+  // Active    — both accepted, duel running
+  // Completed — week ended, winner decided
+  // Declined  — challenger rejected
+
+  winnerId        String?    // null until resolved
+  startedAt       DateTime?  // when challenger accepts
+  endsAt          DateTime?  // startedAt + 7 days
+  resolvedAt      DateTime?
+  createdAt       DateTime   @default(now())
+
+  @@index([networkId])
+  @@index([initiatorId])
+  @@index([challengerId])
+  @@map("duel")
+}
+
+enum DuelStatus {
+  Pending
+  Active
+  Completed
+  Declined
 }

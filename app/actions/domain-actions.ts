@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+// seed create manage domains..
 const CORE_DOMAINS = [
   { name: "Physical",    icon: "◈" },
   { name: "Mental",      icon: "◇" },
@@ -15,20 +16,25 @@ const CORE_DOMAINS = [
   { name: "Vocational",  icon: "▣" },
 ];
 
-async function getSession() {
+export async function getSession() {
   const session = await auth.api.getSession({ headers: await headers() });
+  // if user isn't authenticated return the session and send the error..
   if (!session?.user) throw new Error("Unauthorized");
+  // makes sense how returning session is needed and not returning error object.. 
+  // and why instant stop to an unauthorized session is neccessary.
   return session;
 }
 
 // Called on first load — seeds 7 domains if user has none
 export async function seedDomainsIfNew(): Promise<void> {
+
   const session = await getSession();
   const userId = session.user.id;
 
   const existing = await prisma.domain.count({ where: { userId } });
   if (existing > 0) return;
-
+  // yeah if it exist even more than 0 make now change and return and if not.. 
+  // create via ts const u declared earlier.
   await prisma.domain.createMany({
     data: CORE_DOMAINS.map((d) => ({ ...d, userId })),
   });
@@ -50,12 +56,14 @@ export async function renameDomain(id: string, name: string) {
     where: { id, userId: session.user.id },
     data: { name: name.trim() },
   });
+  // referesh on certain same path, to incorporate changes ....
   revalidatePath("/domain");
 }
 
 // Delete a domain (cascades tasks via schema)
 export async function deleteDomain(id: string) {
   const session = await getSession();
+  // using prisma to implement directly fn like nosql.
   await prisma.domain.deleteMany({
     where: { id, userId: session.user.id },
   });
@@ -65,10 +73,12 @@ export async function deleteDomain(id: string) {
 // Add a custom domain
 export async function addCustomDomain(name: string) {
   const session = await getSession();
+  const icons = ["◌","▣","◆"];
   const domain = await prisma.domain.create({
+    
     data: {
       name: name.trim(),
-      icon: "◌", // custom domain gets open circle icon
+      icon:  icons[Math.floor(Math.random()*icons.length)],// custom domain gets open circle icon
       userId: session.user.id,
     },
   });
@@ -84,6 +94,7 @@ export async function confirmDomains() {
     where: { userId: session.user.id },
     orderBy: { createdAt: "asc" },
   });
+  // if firstobj exist return its id if its undefined return the fallback that's null.
   return first?.id ?? null;
 }
 // In your actions file

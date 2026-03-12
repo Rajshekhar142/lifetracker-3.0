@@ -1,8 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getSession } from "./domain-actions";
 import { revalidatePath } from "next/cache";
 import {
   masteryKey,
@@ -13,11 +12,7 @@ import {
 } from "@/lib/Achievements";
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
-async function getSession() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Unauthorized");
-  return session;
-}
+
 
 // ─── Core unlock helper ───────────────────────────────────────────────────────
 // Filters out already-unlocked keys, inserts only new ones
@@ -248,4 +243,42 @@ export async function toggleAchievementVisibility(key: string): Promise<void> {
   });
 
   revalidatePath("/achievements");
+}
+export async function getWeeklyStats() {
+  const session = await getSession();
+  const userId = session.user.id;
+
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const domains = await prisma.domain.findMany({
+    where: { userId },
+    select: {
+      name: true,
+      tasks: {
+        where: {
+          status: "Completed",
+          createdAt: { gte: weekStart, lte: weekEnd },
+        },
+        select: { calculatedWU: true },
+      },
+    },
+  });
+
+  return {
+    weekStart,
+    weekEnd,
+    totalWU: domains
+      .flatMap((d) => d.tasks)
+      .reduce((s, t) => s + t.calculatedWU, 0),
+    domains: domains.map((d) => ({
+      name: d.name,
+      wu: d.tasks.reduce((s, t) => s + t.calculatedWU, 0),
+    })),
+  };
 }

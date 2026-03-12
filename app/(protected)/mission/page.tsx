@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { signOut } from "better-auth/api";
+import { MedicPanel } from "@/components/MedicPanel";
+import { ShadowStrip } from "@/components/shadowStrip";
 import type { Domain, Task } from "@/generated/prisma/client";
 import {
   getDomainsWithTasks,
@@ -18,7 +20,7 @@ import {
   deleteTask,
 } from "@/app/actions/mission-actions";
 import { AchievementToast } from "@/components/Achievementtoast";
-import { checkAchievementsOnComplete } from "../actions/achievement-store";
+import { checkAchievementsOnComplete } from "../../actions/achievement-store";
 
 
 
@@ -27,6 +29,15 @@ type DomainWithTasks = Domain & {
   tasks: Task[];
   totalWU: number;
   claimedWU: number;
+};
+
+type TaskRowProps = {
+  task: Task;
+  domainName: string;
+  accentColor: string;
+  useAI: boolean;
+  onUpdate: () => void;
+  onTaskComplete: () => void;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -321,12 +332,14 @@ function TaskRow({
   accentColor,
   useAI,
   onUpdate,
+  onTaskComplete,
 }: {
   task: Task;
   domainName: string;
   accentColor: ReturnType<typeof getAccent>;
   useAI: boolean;
   onUpdate: () => void;
+  onTaskComplete: () => void;
 }) {
   const[newAchievements, setNewAchievements]= useState<string[]>([]);
   const [expanded, setExpanded] = useState(false);
@@ -334,7 +347,6 @@ function TaskRow({
   const [editTitle, setEditTitle] = useState(task.title);
   const [showRecall, setShowRecall] = useState(false);
   const [isPending, startTransition] = useTransition();
-
   const isActive = task.status === "In_progress";
   const isRunning = isActive && !!task.startedAt;
   const isDone = task.status === "Completed";
@@ -356,6 +368,7 @@ function TaskRow({
       if(unlocked.length) setNewAchievements(unlocked);
       setShowRecall(false);
       onUpdate();
+      onTaskComplete();
     });
   };
 
@@ -525,7 +538,8 @@ function ActionBtn({ color, onClick, children }: { color: string; onClick: (e: R
 export default function MissionPage() {
   const router = useRouter();
   const { data: session } = useSession();
-
+  const [medicOpen, setMedicOpen] = useState(false);
+  const [shadowRefresh, setShadowRefresh] = useState(0);
   const [domains, setDomains]             = useState<DomainWithTasks[]>([]);
   const [loading, setLoading]             = useState(true);
   const [mounted, setMounted]             = useState(false);
@@ -568,6 +582,9 @@ export default function MissionPage() {
       await refresh();
     });
   };
+  function handleTaskComplete() {
+  setShadowRefresh((p) => p + 1);
+}
 
   const handleSignOut = async () => {
     await signOut();
@@ -919,6 +936,11 @@ export default function MissionPage() {
             <span className="total-wu">{totalWU.toFixed(1)} WU TOTAL</span>
           </div>
 
+          <button className="add-btn" onClick={() => setMedicOpen(true)}>
+            MEDIC
+          </button>
+          <ShadowStrip refreshTrigger={shadowRefresh} />
+
           {/* Polygon */}
           {domains.length >= 3 && (
             <div className="polygon-section">
@@ -996,6 +1018,7 @@ export default function MissionPage() {
                       domain.tasks.map((task) => (
                         <TaskRow
                           key={task.id}
+                          onTaskComplete={handleTaskComplete}
                           task={task}
                           domainName={domain.name}
                           accentColor={accent}
@@ -1062,6 +1085,12 @@ export default function MissionPage() {
         </div>
       </div>
       <AchievementToast newKeys={newAchievements} onDismiss={()=> setNewAchievements([])}/>
+         {medicOpen && (
+      <MedicPanel
+        onClose={() => setMedicOpen(false)}
+        onTasksCreated={refresh}
+      />
+    )}
     </>
   );
 }

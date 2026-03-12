@@ -1,21 +1,37 @@
-import {NextRequest, NextResponse} from "next/server"
-import {headers} from "next/headers";
-import {auth} from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export async function proxy(request: NextRequest){
-    const session = await auth.api.getSession({
-        headers: await headers()
-    })
+const PUBLIC_ROUTES = [
+  "/sign-in",
+  "/sign-up",
+  "/network/join",
+];
 
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-    // this ain't secure
-    // this is recommended approach to optimistically redirect users
-    // we recommend handling auth checks in each page/route
-    if(!session){
-        return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
+  // Allow public routes through
+  if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
+  }
+
+  // Allow landing page
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  return NextResponse.next();
 }
+
 export const config = {
-    matcher: ["/dashboard"],
-}
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

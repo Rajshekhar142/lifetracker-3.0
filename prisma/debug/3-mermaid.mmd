@@ -1,0 +1,201 @@
+erDiagram
+
+        TaskStatus {
+            In_progress In_progress
+Completed Completed
+Failed Failed
+        }
+    
+
+
+        DuelStatus {
+            Pending Pending
+Active Active
+Completed Completed
+Declined Declined
+        }
+    
+  "user" {
+    String id "🗝️"
+    String name 
+    String email 
+    Boolean emailVerified 
+    String image "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "session" {
+    String id "🗝️"
+    DateTime expiresAt 
+    String token 
+    DateTime createdAt 
+    DateTime updatedAt 
+    String ipAddress "❓"
+    String userAgent "❓"
+    String userId 
+    }
+  
+
+  "account" {
+    String id "🗝️"
+    String accountId 
+    String providerId 
+    String userId 
+    String accessToken "❓"
+    String refreshToken "❓"
+    String idToken "❓"
+    DateTime accessTokenExpiresAt "❓"
+    DateTime refreshTokenExpiresAt "❓"
+    String scope "❓"
+    String password "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "verification" {
+    String id "🗝️"
+    String identifier 
+    String value 
+    DateTime expiresAt 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "domain" {
+    String id "🗝️"
+    String name 
+    String icon "❓"
+    DateTime createdAt 
+    String userId 
+    }
+  
+
+  "task" {
+    String id "🗝️"
+    String title 
+    String description "❓"
+    Int difficulty 
+    TaskStatus status 
+    Boolean isMedicTask 
+    Int durationMinutes "❓"
+    Int resistanceLevel 
+    Float calculatedWU 
+    DateTime createdAt 
+    DateTime startedAt "❓"
+    String domainId 
+    String userId 
+    }
+  
+
+  "achievement" {
+    String id "🗝️"
+    String userId 
+    String key 
+    Boolean isPublic 
+    DateTime unlockedAt 
+    }
+  
+
+  "medic_log" {
+    String id "🗝️"
+    String userId 
+    String input 
+    Int severity 
+    String keywords 
+    String domainsActive 
+    Float wuBeforeMedic 
+    Float wuAfterMedic 
+    DateTime recoveredAt "❓"
+    Int tasksCreated 
+    Int tasksCompleted 
+    String advice 
+    DateTime createdAt 
+    }
+  
+
+  "weekly_digest" {
+    String id "🗝️"
+    String userId 
+    DateTime weekStart 
+    DateTime weekEnd 
+    Int medicSessions 
+    Float avgSeverity 
+    String topTriggers 
+    String strongDomains 
+    Float recoveryAvgDays 
+    Float totalWU 
+    String summary 
+    Boolean emailSent 
+    DateTime sentAt "❓"
+    DateTime createdAt 
+    }
+  
+
+  "shadow_threshold" {
+    String id "🗝️"
+    String userId 
+    String domainId 
+    Float threshold 
+    DateTime updatedAt 
+    DateTime weekStart 
+    }
+  
+
+  "network" {
+    String id "🗝️"
+    String name 
+    String domain 
+    String inviteCode 
+    String createdById 
+    DateTime createdAt 
+    }
+  
+
+  "network_member" {
+    String id "🗝️"
+    String userId 
+    String networkId 
+    DateTime joinedAt 
+    }
+  
+
+  "duel" {
+    String id "🗝️"
+    String networkId 
+    String initiatorId 
+    String challengerId 
+    String domain 
+    Float initiatorBet 
+    Float challengerBet 
+    Float initiatorWU 
+    Float challengerWU 
+    DuelStatus status 
+    String winnerId "❓"
+    DateTime startedAt "❓"
+    DateTime endsAt "❓"
+    DateTime resolvedAt "❓"
+    DateTime createdAt 
+    }
+  
+    "session" }o--|| user : "user"
+    "account" }o--|| user : "user"
+    "domain" }o--|| user : "user"
+    "task" |o--|| "TaskStatus" : "enum:status"
+    "task" }o--|| domain : "domain"
+    "task" }o--|| user : "user"
+    "achievement" }o--|| user : "user"
+    "medic_log" }o--|| user : "user"
+    "weekly_digest" }o--|| user : "user"
+    "shadow_threshold" }o--|| user : "user"
+    "shadow_threshold" |o--|| domain : "domain"
+    "network" }o--|| user : "createdBy"
+    "network_member" }o--|| user : "user"
+    "network_member" }o--|| network : "network"
+    "duel" }o--|| network : "network"
+    "duel" }o--|| user : "initiator"
+    "duel" }o--|| user : "challenger"
+    "duel" |o--|| "DuelStatus" : "enum:status"

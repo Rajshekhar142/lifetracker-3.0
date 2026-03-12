@@ -1,17 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import type { Domain, Task} from "@/generated/prisma/client";
+// create once use everywhere.. auth helper..
+import { getSession } from "./domain-actions";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
-async function getSession() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Unauthorized");
-  return session;
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type TaskWithDomain = Task & { domain: Domain };

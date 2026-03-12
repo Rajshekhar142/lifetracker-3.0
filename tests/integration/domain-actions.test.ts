@@ -180,23 +180,6 @@ describe("deleteDomain", () => {
   });
 });
 
-// ─── addCustomDomain ──────────────────────────────────────────────────────────
-describe("addCustomDomain", () => {
-  it("creates a custom domain with open circle icon", async () => {
-    const mockDomain = { id: "d_new", name: "Creativity", icon: "◌", userId: MOCK_USER_ID, createdAt: new Date() };
-    vi.mocked(prisma.domain.create).mockResolvedValue(mockDomain as any);
-
-    const result = await addCustomDomain("  Creativity  ");
-
-    expect(prisma.domain.create).toHaveBeenCalledWith({
-      data: {
-        name: "Creativity",
-        icon: "◌",
-        userId: MOCK_USER_ID,
-      },
-    });
-    expect(result.name).toBe("Creativity");
-  });
 
   it("trims whitespace from custom domain name", async () => {
     vi.mocked(prisma.domain.create).mockResolvedValue({
@@ -213,4 +196,3 @@ describe("addCustomDomain", () => {
     mockUnauthSession();
     await expect(addCustomDomain("NewDomain")).rejects.toThrow("Unauthorized");
   });
-});
