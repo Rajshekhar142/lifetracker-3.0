@@ -1,263 +1,301 @@
 # LifeTracker 3.0
 
-> Build the life you keep delaying.
-
-A structured system for tracking effort, measuring growth, and compounding progress across every dimension of your life. Built on the Feynman technique — you don't just log tasks, you account for them.
+> *A personal productivity OS built on the philosophy that human potential spans seven domains — and growth in each compounds against all others.*
 
 ---
 
-## What It Is
+## Philosophy
 
-Most productivity apps track tasks. LifeTracker tracks **you** — across 7 life domains, measuring not just what you did but how hard it was and whether you actually retained it.
+Most productivity tools track tasks. LifeTracker tracks **you** — across every dimension of a complete human life.
 
-Every completed task generates a **Work Unit (WU)**:
+The seven domains:
 
-```
-WU = Time Invested × Resistance Multiplier × Recall Accuracy
-```
+| Domain | What it covers |
+|--------|---------------|
+| **Physical** | Health, fitness, body |
+| **Mental** | Learning, knowledge, cognition |
+| **Emotional** | Self-awareness, regulation, relationships |
+| **Spiritual** | Purpose, values, meaning |
+| **Social** | Community, network, contribution |
+| **Financial** | Wealth, assets, financial intelligence |
+| **Vocational** | Career, craft, creative output |
 
-- **Time** — live tracked from when you start to when you finish
-- **Resistance** — how hard was it today? (1–10, maps to 1×, 2×, 4×)
-- **Recall** — can you explain what you did? AI or heuristic evaluation
+Every task you complete earns **Work Units (WU)** — a single number that captures not just time spent, but how hard the task actually was and how well you retained the knowledge.
 
 ---
 
-## The 7 Domains
+## The WU Formula
 
-| Domain | Focus |
-|---|---|
-| Physical | Body, fitness, sleep, energy |
-| Mental | Intellect, learning, clarity |
-| Emotional | Self-awareness, healing, regulation |
-| Spiritual | Meaning, values, purpose |
-| Social | Relationships, community, presence |
-| Financial | Resources, saving, wealth building |
-| Vocational | Craft, output, skills, contribution |
+```
+WU = (duration_minutes / 60) × resistance_multiplier × recall_multiplier
+```
 
-You can customize — rename, delete, or add your own. The system recommends keeping all 7 active. A complete system compounds faster.
+**Resistance levels:**
+
+| Level | Multiplier | Meaning |
+|-------|-----------|---------|
+| 1 | 1.0× | Routine |
+| 2 | 1.5× | Moderate effort |
+| 3 | 2.25× | Challenging |
+| 4 | 3.0× | Very hard |
+| 5 | 4.0× | Extreme |
+
+**Recall multiplier (Feynman technique):**
+
+After completing a task you explain what you did in plain language. The depth of your explanation determines your recall score (0.5× to 2.0×). This means a 30-minute task at resistance 5 with perfect recall is worth more than a 2-hour routine task done mindlessly.
 
 ---
 
 ## Features
 
 ### Core
-- **Domain Setup** — initialize your 7 domains on first login, customize freely
-- **Mission Stack** — log tasks per domain, track effort in real time
-- **Live Timer** — persisted in DB, survives tab close and app refresh
-- **Resistance System** — 1–10 scale with multiplier tiers (1×, 2×, 4×)
-- **Recall Check** — Feynman-style popup before task completion
-  - AI evaluation via Claude API (domain-aware prompts)
-  - Heuristic fallback (keyword overlap + word count)
-  - Reflection mode for Physical/Vocational domains
-- **WU Calculation** — time × resistance × recall, stored per task
+- **7-domain task system** — every task belongs to a domain, earns domain-specific WU
+- **Resistance levels** — rate how hard each task was before completing
+- **Recall evaluation** — post-completion Feynman explanation scored by AI
+- **WU accumulation** — lifetime score across all domains
 
-### Achievements
-- **Domain Mastery** — 4 tiers per domain (Novice → Apprentice → Operator → Elite)
-- **Hidden Achievements** — 8 secret unlocks, conditions unknown until earned
-- **Toast Notifications** — subtle unlock alerts at bottom of mission page
-- **Visibility Control** — toggle each achievement public or private
+### Shadow Bot
+A silent ninja that watches your output. Never speaks unless you push past your threshold.
 
-### Auth
-- Email/password sign in and sign up
-- Google OAuth
-- Session-based auth via better-auth
-- Middleware protection on all routes
-- Server action auth guards on every DB operation
+- Tracks your **rolling 7-day average WU per domain**
+- Sets a threshold at **115% of your average**
+- Eyes stay dark while you work — **light up cyan** when you cross the threshold for a domain
+- Threshold **updates every 7 days** — progressive overload. As you get stronger, the bar rises
+- Lives as a **persistent strip** on the mission page — always visible, always watching
 
-### Life Polygon
-- Dynamic SVG polygon on mission page
-- `n` sides = number of active domains
-- Each segment's opacity scales with domain WU progress
-- Visual snapshot of your life balance at a glance
+### Medic Bot
+Recovery protocol for bad days. Lowers the floor, not the ceiling.
+
+- Activate when you're struggling — describe how you feel, rate severity 1-5
+- **Groq AI** (Llama 3) generates domain-specific gentle recovery tasks
+- Falls back to rule-based suggestions if AI is unavailable
+- Logs every bad day — tracks **recovery time, stress patterns, trigger keywords**
+- **Weekly digest** — analytics on your hard days, strongest domains, recurring triggers
+- Digest sent via **Resend** email every Monday
+
+### Achievement System
+36 achievements across mastery tiers and hidden unlocks.
+
+**Mastery tiers per domain** (earned by cumulative WU):
+- Novice → Apprentice → Operator → Elite
+
+**Hidden achievements** — unlocked by behavior patterns:
+- Consistency streaks, extreme resistance tasks, perfect recall, multi-domain days, and more
+
+Achievements fire as **toast notifications** on task completion.
+
+### Networks
+Domain-focused groups of up to 20 members.
+
+- Create a network around any domain
+- Share an **invite link** — join page shows domain, member count, creator
+- **Leaderboard** — rolling 7-day WU rankings among members
+- **Member profiles** — mastery tier visible on leaderboard
+
+### Duels
+1v1 WU battles with real stakes.
+
+- Challenge any network member to a duel on any domain
+- Each player **stakes their own WU bet**
+- **7-day window** — whoever earns more domain WU wins
+- Winner takes the loser's staked WU — **permanently deducted** from the loser
+- Tie goes to the initiator
+
+### Share Card
+Weekly summary card for Instagram.
+
+- Cyberpunk-styled image card with total WU, domain breakdown bars
+- Generated via **html2canvas** — downloads as PNG, ready to post
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
+|-------|-----------|
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
-| Auth | better-auth |
+| Database | PostgreSQL via Neon (serverless) |
 | ORM | Prisma |
-| Database | PostgreSQL (Neon) |
-| Styling | Custom CSS (cyberpunk design system) |
+| Auth | better-auth (email/password + Google OAuth) |
+| AI — Recall | Groq API (Llama 3 8B) |
+| AI — Medic | Groq API (Llama 3 8B) |
+| Email | Resend |
+| PWA | @ducanh2912/next-pwa |
+| Styling | CSS-in-JS (inline styles + CSS modules) |
 | Testing | Vitest |
-| CI | GitHub Actions |
-| Deployment | Vercel |
-| AI Recall | Anthropic Claude API (claude-haiku) |
+| CI/CD | GitHub Actions → Vercel |
+| Fonts | Rajdhani, Share Tech Mono |
 
 ---
 
 ## Project Structure
 
 ```
-app/
-  (auth)/
-    sign-in/          — sign in page
-    sign-up/          — sign up page
-  dashboard/          — post-auth landing, redirects based on domain state
-  domain/             — domain setup and management
-  mission/            — core app — task logging, timer, recall
-  achievements/       — mastery tiers and hidden achievements
-  actions/
-    domain-actions.ts — domain CRUD + seeding
-    mission-actions.ts — task CRUD, timer, WU calculation, recall eval
-    achievement-store.ts — achievement evaluation engine + fetch
-  layout.tsx
-  page.tsx            — landing page
-
-lib/
-  auth.ts             — better-auth config
-  auth-client.ts      — client-side auth helpers
-  prisma.ts           — prisma client singleton
-  achievements.ts     — achievement catalogue (pure definitions)
-
-middleware.ts         — route protection (cookie check)
-
-tests/
-  unit/
-    wu-formula.test.ts
-    achievement-catalogue.test.ts
-  integration/
-    domain-actions.test.ts
-    task-and-achievements.test.ts
-
-.github/
-  workflows/
-    ci.yml            — type check → lint → test → build
+lifetracker-3.0/
+├── app/
+│   ├── (auth)/
+│   │   ├── sign-in/
+│   │   └── sign-up/
+│   ├── (protected)/
+│   │   ├── dashboard/
+│   │   ├── domain/
+│   │   ├── mission/
+│   │   ├── achievements/
+│   │   └── network/
+│   │       └── join/[inviteCode]/
+│   ├── actions/
+│   │   ├── domain-actions.ts
+│   │   ├── mission-actions.ts
+│   │   ├── achievement-store.ts
+│   │   ├── medic-actions.ts
+│   │   ├── medic-email.ts
+│   │   ├── shadow-actions.ts
+│   │   └── network-actions.ts
+│   └── api/
+│       └── auth/[...all]/
+├── components/
+│   ├── Navbar.tsx
+│   ├── ShadowStrip.tsx
+│   ├── MedicPanel.tsx
+│   ├── ShareCard.tsx
+│   └── AchievementToast.tsx
+├── lib/
+│   ├── auth.ts
+│   ├── auth-client.ts
+│   └── prisma.ts
+├── prisma/
+│   └── schema.prisma
+└── tests/
+    ├── unit/
+    │   ├── wu-formula.test.ts
+    │   └── achievement-catalogue.test.ts
+    └── integration/
+        ├── domain-actions.test.ts
+        └── task-and-achievements.test.ts
 ```
 
 ---
 
 ## Data Model
 
-```prisma
+```
 User
-  ├── Session[]
-  ├── Account[]
-  ├── Domain[]
-  ├── Task[]
-  └── Achievement[]
+ ├── Domain[]              — up to 7 domains
+ ├── Task[]                — all tasks across domains
+ ├── Achievement[]         — unlocked achievements
+ ├── MedicLog[]            — bad day sessions
+ ├── WeeklyDigest[]        — monday email digests
+ ├── ShadowThreshold[]     — per-domain WU thresholds
+ ├── Network[]             — networks created
+ ├── NetworkMember[]       — networks joined
+ ├── Duel[] (initiator)    — duels started
+ └── Duel[] (challenger)   — duels received
 
-Domain
-  ├── userId → User
-  └── Task[]
+Network
+ ├── domain                — single domain focus
+ ├── inviteCode            — unique join slug
+ ├── NetworkMember[]
+ └── Duel[]
 
-Task
-  ├── userId → User
-  ├── domainId → Domain
-  ├── status: In_progress | Completed | Failed
-  ├── resistanceLevel: Int
-  ├── durationMinutes: Int?
-  ├── startedAt: DateTime?
-  └── calculatedWU: Float
-
-Achievement
-  ├── userId → User
-  ├── key: String        — e.g. "physical_elite", "iron_will"
-  ├── isPublic: Boolean
-  └── unlockedAt: DateTime
+Duel
+ ├── initiator + challenger
+ ├── domain                — flexible, any domain
+ ├── initiatorBet + challengerBet
+ ├── initiatorWU + challengerWU
+ ├── status                — Pending | Active | Completed | Declined
+ └── winnerId
 ```
 
 ---
 
-## Getting Started
+## Setup
 
 ### Prerequisites
-- Node.js 20+
-- PostgreSQL database (Neon recommended)
-- Google OAuth credentials (optional)
-- Anthropic API key (optional — falls back to heuristics)
-
-### Setup
-
-```bash
-# Clone and install
-git clone https://github.com/your-username/lifetracker
-cd lifetracker
-npm install
-
-# Environment
-cp .env.example .env.local
-# Fill in your values
-
-# Database
-npx prisma migrate dev
-npx prisma generate
-
-# Run
-npm run dev
-```
+- Node.js 18+
+- PostgreSQL (or Neon account)
+- Groq API key (free at console.groq.com)
+- Resend API key (free at resend.com)
+- Google OAuth credentials
 
 ### Environment Variables
 
 ```env
 DATABASE_URL=
 BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=http://localhost:3000
-NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_URL=
+NEXT_PUBLIC_BETTER_AUTH_URL=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-ANTHROPIC_API_KEY=
+GROQ_API_KEY=
+RESEND_API_KEY=
 ```
 
----
-
-## Testing
+### Install & Run
 
 ```bash
-npm run test:run        # all tests
-npm run test:unit       # unit tests only
-npm run test:integration # integration tests only
-npm run test:coverage   # coverage report
+npm install
+npx prisma migrate dev
+npx prisma generate
+npm run dev
 ```
 
-**68 tests** across 4 files covering:
-- WU formula and resistance multiplier boundaries
-- Recall heuristic evaluation
-- Achievement catalogue integrity (36 achievements)
-- Domain CRUD with auth scoping
-- Task lifecycle — create, start, complete, fail, delete
-- Achievement evaluation — hidden (instant) and mastery (threshold)
+### Run Tests
+
+```bash
+npm run test              # all tests
+npm run test:unit         # unit only
+npm run test:integration  # integration only
+npm run test:coverage     # with coverage report
+```
 
 ---
 
 ## CI/CD
 
-Every push to `main` runs:
+Push to `main` → GitHub Actions runs:
+1. Type check (`tsc --noEmit`)
+2. Test suite (Vitest)
+3. Build (`prisma generate && next build`)
+4. Vercel deploys automatically on pass
 
-```
-Type Check → Lint → Tests → Build
-```
+---
 
-Vercel deployment is blocked until all checks pass.
+## PWA
+
+Installable on mobile and desktop via `@ducanh2912/next-pwa`. Service worker auto-generated on build. Add to home screen for full app experience — session persists 30 days, no repeated logins.
 
 ---
 
 ## Roadmap
 
-- [ ] Battle Ground — 1v1 WU bets, week duration, winner takes all
-- [ ] Public profiles — achievement display, domain mastery visible to others
-- [ ] Networks — create or join accountability groups
-- [ ] Web push notifications — daily mission reminders, streak alerts
-- [ ] Streak tracking — consecutive active days
-- [ ] Weekly WU summary — domain breakdown, progress over time
+```
+▣ Email OTP verification     — pending domain purchase
+▣ Weekly digest cron job     — Vercel cron or external
+▣ Duel auto-resolution cron  — runs nightly
+▣ Public profiles            — shareable domain mastery page
+▣ Battle Ground              — open leaderboard across all users
+▣ Shadow weekly challenge    — opt-in weekly WU targets
+▣ Mobile push notifications  — PWA push API
+```
 
 ---
 
 ## Design System
 
-Consistent cyberpunk aesthetic across all pages:
+**Colors:**
+- Background: `#050508`
+- Cyan accent: `#00ffff`
+- Pink / Medic: `#f472b6`
+- Purple: `#a78bfa`
+- Gold / Elite: `#fbbf24`
 
-- **Background** — `#050508` near-black with scanline overlay
-- **Primary accent** — `#00ffff` cyan
-- **Secondary accents** — violet `#a78bfa`, pink `#f472b6`
-- **Fonts** — Rajdhani (UI), Share Tech Mono (labels/code)
-- **Principle** — neon only on interaction, not by default. The darkness makes the light meaningful.
+**Typography:**
+- Display / UI: `Rajdhani` (700, 600, 500)
+- Mono / Labels: `Share Tech Mono`
+
+**Aesthetic:** Cyberpunk terminal — dark backgrounds, glowing accents, scanline textures, monospaced labels, minimal chrome. Every UI element earns its place.
 
 ---
 
-## License
-
-MIT
+*Built to be used daily. Designed to make you better.*
