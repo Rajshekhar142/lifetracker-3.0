@@ -8,14 +8,6 @@ generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
-generator erd {
-  provider                  = "prisma-erd-generator"
-  output                    = "./ERD.png"
-  theme                     = "dark"        // "default" renders clearest lines
-  includeRelationFromFields = true
-  erdDebug                  = true
-  disabled                  = false
-}
 
 datasource db {
   provider = "postgresql"
