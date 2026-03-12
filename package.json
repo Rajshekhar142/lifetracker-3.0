@@ -27,6 +27,7 @@
     "react-dom": "19.2.3",
     "resend": "^6.9.3"
   },
+  "postinstall": "prisma generate",
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.12.0",
     "@tailwindcss/postcss": "^4",
