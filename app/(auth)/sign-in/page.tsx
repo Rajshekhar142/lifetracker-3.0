@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, authClient } from "@/lib/auth-client";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { checkUserHasDomains } from "../../actions/domain-actions";
-
 
 export default function SignInPage() {
   const router = useRouter();
@@ -13,7 +12,11 @@ export default function SignInPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-
+  useEffect(() => {
+  authClient.getSession().then((session) => {
+    if (session.data) router.push("/mission");
+  });
+}, []);
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);

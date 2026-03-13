@@ -900,29 +900,6 @@ export default function MissionPage() {
       <div className="cp-root">
         <div className="bg-ambient" />
 
-        {/* Sidenav */}
-        <div className={`sidenav-overlay ${sidenavOpen ? "open" : ""}`} onClick={() => setSidenavOpen(false)} />
-        <nav className={`sidenav ${sidenavOpen ? "open" : ""}`}>
-          <div className="sidenav-logo">LIFETRACK</div>
-
-          <Link href="/profile" className="nav-link" onClick={() => setSidenavOpen(false)}>
-            <span className="nav-dot" />Profile
-          </Link>
-          <Link href="/mission" className="nav-link active" onClick={() => setSidenavOpen(false)}>
-            <span className="nav-dot" />Mission Stack
-          </Link>
-          <Link href="/achievements" className="nav-link" onClick={() => setSidenavOpen(false)}>
-            <span className="nav-dot" />Achievements
-          </Link>
-          <Link href="/battleground" className="nav-link" onClick={() => setSidenavOpen(false)}>
-            <span className="nav-dot" />Battle Ground
-          </Link>
-
-          <button className="nav-link signout" onClick={handleSignOut} style={{ marginTop: "auto" }}>
-            <span className="nav-dot" />Sign Out
-          </button>
-        </nav>
-
         <div className={`cp-layout ${mounted ? "mounted" : ""}`}>
 
           {/* Topbar */}

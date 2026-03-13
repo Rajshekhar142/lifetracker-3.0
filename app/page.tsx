@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {redirect} from "next/navigation";
+import { auth } from "@/lib/auth";
+import {headers} from "next/headers";
 import Link from "next/link";
 import "@/styles/darktypo.css"
 
@@ -14,10 +17,18 @@ const DOMAINS = [
   { name: "Vocational", sub: "Craft & Output" },
 ];
 
-export default function RootPage() {
+export default async function RootPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if(session){
+    redirect("/mision");
+  }
 
   return (
     <>
