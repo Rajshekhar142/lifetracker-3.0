@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {redirect} from "next/navigation";
-import { auth } from "@/lib/auth";
-import {headers} from "next/headers";
+import {useRouter} from "next/navigation";
+import {authClient} from "@/lib/auth-client";
 import Link from "next/link";
 import "@/styles/darktypo.css"
 
@@ -20,15 +19,13 @@ const DOMAINS = [
 export default async function RootPage() {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+   const router = useRouter();
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if(session){
-    redirect("/mision");
-  }
+  useEffect(() => {
+    authClient.getSession().then((res) => {
+      if (res.data?.session) router.push("/mission");
+    });
+  }, []);
 
   return (
     <>
