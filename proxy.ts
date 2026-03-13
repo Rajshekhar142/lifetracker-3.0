@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 const PUBLIC_ROUTES = [
   "/sign-in",
@@ -11,7 +10,7 @@ const PUBLIC_ROUTES = [
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes through
+  // Allow public routes
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
@@ -21,8 +20,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Use better-auth cookie check — lightweight, no DB hit
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: request.headers, // ← use request.headers directly, not next/headers
   });
 
   if (!session) {
@@ -33,5 +33,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|favicon.svg|favicon-96x96.png|manifest.webmanifest|web-app-manifest-192x192.png|web-app-manifest-512x512.png|apple-touch-icon.png|sw.js|workbox-).*)",
+  ],
 };
