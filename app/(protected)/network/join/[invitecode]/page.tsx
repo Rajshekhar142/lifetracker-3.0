@@ -26,36 +26,53 @@ const DOMAIN_COLORS: Record<string, string> = {
 export default function JoinNetworkPage() {
   const params                        = useParams();
   const router                        = useRouter();
-  const inviteCode                    = params.inviteCode as string;
+  const inviteCode = params.invitecode as string;
   const [network, setNetwork]         = useState<NetworkPreview | null>(null);
   const [error, setError]             = useState<string | null>(null);
   const [joined, setJoined]           = useState(false);
   const [isPending, startTransition]  = useTransition();
 
-  useEffect(() => {
-    if (!inviteCode) return;
-    getNetworkByInviteCode(inviteCode)
-      .then(setNetwork)
-      .catch(() => setError("Invalid or expired invite link."));
-  }, [inviteCode]);
-
-  function handleJoin() {
-    startTransition(async () => {
-      try {
-        await joinNetwork(inviteCode);
-        setJoined(true);
-        setTimeout(() => router.push("/network"), 2000);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Failed to join";
-        // Already a member — just redirect
-        if (msg === "Already a member") {
-          router.push("/network");
-          return;
-        }
-        setError(msg);
-      }
-    });
+ useEffect(() => {
+  console.log("params:", params);
+  console.log("inviteCode:", inviteCode);
+  if (!inviteCode) {
+    console.log("NO INVITE CODE — returning early");
+    return;
   }
+  console.log("calling getNetworkByInviteCode...");
+  getNetworkByInviteCode(inviteCode)
+    .then((data) => {
+      console.log("network data:", data);
+      setNetwork(data);
+    })
+    .catch((err) => {
+      console.error("error:", err);
+      setError("Invalid or expired invite link.");
+    });
+}, [inviteCode]);
+
+  async function handleJoin() {
+  startTransition(async () => {
+    try {
+      await joinNetwork(inviteCode);
+      setJoined(true);
+      // give time for session to exist before redirecting
+      setTimeout(() => router.push("/network"), 2000);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to join";
+      if (msg === "Already a member") {
+        router.push("/network");
+        return;
+      }
+      // Not signed in — redirect to sign-in with return URL
+      if (msg === "Unauthorized") {
+        router.push(`/sign-in?redirect=/network/join/${inviteCode}`);
+        return;
+      }
+      setError(msg);
+    }
+  });
+}
 
   const accentColor = network
     ? DOMAIN_COLORS[network.domain] ?? "#00ffff"

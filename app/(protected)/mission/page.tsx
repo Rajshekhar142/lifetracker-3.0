@@ -895,6 +895,97 @@ export default function MissionPage() {
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+        /* ── Mobile first fixes ── */
+@media (max-width: 480px) {
+
+  .cp-layout {
+    padding: 0 14px 100px;
+  }
+
+  .cp-topbar {
+    padding: 14px 0 12px;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .page-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+  }
+
+  .total-wu {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Domain row — tighten up */
+  .domain-row-header {
+    padding: 11px 10px;
+    gap: 8px;
+  }
+
+  .domain-row-name {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+
+  .domain-wu-badge {
+    font-size: 9px;
+    /* show only earned WU on mobile — hide /total */
+    letter-spacing: 0.04em;
+  }
+
+  .domain-tasks-panel {
+    padding: 4px 10px 8px 28px;
+  }
+
+  /* Task input — stack vertically on mobile */
+  .task-input-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .task-input {
+    flex: 1 1 100%; /* full width on its own row */
+    font-size: 16px; /* prevents iOS zoom on focus */
+    padding: 12px 12px;
+  }
+
+  .resistance-wrap {
+    flex: 0 0 auto;
+  }
+
+  .resistance-input {
+    width: 56px;
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+
+  .add-btn {
+    flex: 1; /* fills remaining space next to resistance */
+    padding: 12px 10px;
+    font-size: 10px;
+  }
+
+  /* iOS safe area for sticky bottom */
+  .task-input-section {
+    padding: 14px 0 calc(20px + env(safe-area-inset-bottom));
+  }
+
+  /* AI toggle */
+  .ai-toggle {
+    margin-top: 10px;
+  }
+
+  .ai-toggle-label {
+    font-size: 8px;
+  }
+
+  /* Polygon — smaller on mobile */
+  .polygon-section {
+    margin-bottom: 24px;
+  }
+}
       `}</style>
 
       <div className="cp-root">
